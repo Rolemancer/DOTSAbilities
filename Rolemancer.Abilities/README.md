@@ -1,0 +1,1 @@
+An attempt to create a project-independent framework for working with attributes, effects, abilities that are used everywhere in games.
