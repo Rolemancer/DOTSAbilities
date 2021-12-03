@@ -33,6 +33,16 @@ namespace Rolemancer.Abilities.Attributes
             Set(id);
         }
 
+        public void Append(AttributeCollectionByDBKey attributes)
+        {
+            var temp = attributes.GetAllAttributes(Allocator.Temp);
+            for (int i = 0; i < temp.Length; i++)
+            {
+                Set(temp[i]);
+            }
+            temp.Dispose();
+        }
+        
         public bool Remove(AttributeDBKey id)
         {
             return _keys.Remove(id);

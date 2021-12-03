@@ -16,6 +16,11 @@ namespace Rolemancer.Abilities.DataMapping
             map.Effects.AddEffect(targetId, effect);
         }
         
+        public static void DiscardEffect(this EffectComplexKey key, DataMap map)
+        {
+            map.Effects.DiscardEffect(key);
+        }
+        
         public static void DestroyEffect(this EffectComplexKey effectKey, DataMap map)
         {
             map.Effects.RemoveEffect(effectKey);

@@ -10,6 +10,7 @@ namespace Rolemancer.Abilities.Modifiers
 
         public AttributeCollectionByDBKey CurrentAttributes;
         public AttributeCollectionByDBKey PrevAttributes;
+        public AttributeDBKeysCollection Changed;
 
         public void Dispose()
         {

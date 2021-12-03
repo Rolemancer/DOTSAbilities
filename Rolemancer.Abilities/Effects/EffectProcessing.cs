@@ -1,8 +1,10 @@
-﻿using Rolemancer.Abilities.DataMapping;
+﻿using Rolemancer.Abilities.Attributes;
+using Rolemancer.Abilities.DataMapping;
 using Rolemancer.Abilities.Modifiers;
 using Rolemancer.Abilities.Tests.ConcreteModifierProcessors;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace Rolemancer.Abilities.Effects
 {
@@ -49,7 +51,9 @@ namespace Rolemancer.Abilities.Effects
                         continue;
                     effect.Status = EffectStatus.Pending;
                     if (effect.ApplyMode == EffectApplyMode.LongLife)
+                    {
                         effect.DiscardTime = ElapsedTime + effect.LifeTime;
+                    }
                     effectsCollection[key] = effect;
                 }
 
@@ -78,10 +82,10 @@ namespace Rolemancer.Abilities.Effects
                         continue;
 
                     var finishTime = effect.DiscardTime;
+
                     if (ElapsedTime >= finishTime)
                     {
-                        effect.Status = EffectStatus.Discarded;
-                        effectsCollection[key] = effect;
+                        key.DiscardEffect(Map);
                     }
                 }
 
@@ -102,7 +106,7 @@ namespace Rolemancer.Abilities.Effects
             private void UpdateAttributes()
             {
                 var effects = Map.Effects.GetAllEffects();
-                var affectedTargets = Map.Effects.GetAffectedTargets();
+                var affectedTargets = Map.Effects.GetAffectedTargets(Allocator.Temp);
 
                 for (var i = 0; i < affectedTargets.Length; i++)
                 {
@@ -113,6 +117,8 @@ namespace Rolemancer.Abilities.Effects
 
                     var targetEffects = Map.Effects.GetTargetEffects(targetId, Allocator.Temp);
                     var keys = targetEffects.GetKeyArray(Allocator.Temp);
+                    var diff = new AttributeDBKeysCollection(Allocator.Temp);
+                    
                     for (var j = 0; j < keys.Length; j++)
                     {
                         var effectKey = keys[j];
@@ -125,6 +131,8 @@ namespace Rolemancer.Abilities.Effects
                         if (isImmediate || effect.Status == EffectStatus.Pending)
                         {
                             current.Append(effectAttrs);
+                            diff.Append(effectAttrs);
+                            
                             effect.Status = EffectStatus.Applied;
 
                             if (isImmediate)
@@ -135,6 +143,8 @@ namespace Rolemancer.Abilities.Effects
                         else if (effect.Status == EffectStatus.Discarded)
                         {
                             current.Truncate(effectAttrs);
+                            //Yes, add keys of changed attributes
+                            diff.Append(effectAttrs);
                             effects[effectKey] = effect;
                         }
                     }
@@ -145,7 +155,8 @@ namespace Rolemancer.Abilities.Effects
                     {
                         Target = targetId,
                         CurrentAttributes = current,
-                        PrevAttributes = prev
+                        PrevAttributes = prev,
+                        Changed = diff
                     };
 
                     ModifierProcessorsRunner.ProcessAttributes(BattleModifierProcessorLibrary.ProcessorFunctions,
@@ -156,8 +167,10 @@ namespace Rolemancer.Abilities.Effects
                     targetEffects.Dispose();
                     prev.Dispose();
                     current.Dispose();
+                    diff.Dispose();
                 }
 
+                affectedTargets.Dispose();
                 Map.Effects.ResetAffectedTargets();
             }
         }
@@ -174,7 +187,11 @@ namespace Rolemancer.Abilities.Effects
                 for (var i = 0; i < keys.Length; i++)
                 {
                     var key = keys[i];
-                    key.DestroyEffect(Map);
+                    var effect = effectsCollection.Get(key);
+                    if (effect.Status == EffectStatus.Discarded)
+                    {
+                        key.DestroyEffect(Map);
+                    }
                 }
 
                 keys.Dispose();

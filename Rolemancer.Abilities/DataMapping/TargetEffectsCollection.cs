@@ -13,14 +13,14 @@ namespace Rolemancer.Abilities.DataMapping
         private EffectsCollection _effects;
         private NativeMultiHashMap<TargetId, EffectComplexKey> _targetEffects;
         private NativeHashMap<EffectComplexKey, TargetId> _effectToTarget;
-        private NativeList<TargetId> _affectedTargets;
+        private NativeHashSet<TargetId> _affectedTargets;
         
         public TargetEffectsCollection(AllocatorManager.AllocatorHandle handle)
         {
             _effects = new EffectsCollection(handle);
             _targetEffects = new NativeMultiHashMap<TargetId, EffectComplexKey>(10, handle);
             _effectToTarget = new NativeHashMap<EffectComplexKey, TargetId>(10, handle);
-            _affectedTargets = new NativeList<TargetId>(10, handle);
+            _affectedTargets = new NativeHashSet<TargetId>(10, handle);
         }
 
         public void AddEffect(TargetId targetId, Effect effect)
@@ -32,6 +32,14 @@ namespace Rolemancer.Abilities.DataMapping
             _affectedTargets.Add(targetId);
         }
 
+        public void DiscardEffect(EffectComplexKey key)
+        {
+            var effect = _effects.Get(key);
+            effect.Status = EffectStatus.Discarded;
+            _effects[key] = effect;
+            _affectedTargets.Add(key.Target);
+        }
+        
         public bool HasEffects(TargetId targetId)
         {
             return _targetEffects.ContainsKey(targetId);
@@ -112,9 +120,9 @@ namespace Rolemancer.Abilities.DataMapping
             _affectedTargets.Add(targetId);
         }
 
-        public NativeList<TargetId> GetAffectedTargets()
+        public NativeArray<TargetId> GetAffectedTargets(AllocatorManager.AllocatorHandle handle)
         {
-            return _affectedTargets;
+            return _affectedTargets.ToNativeArray(handle);
         }
         
         public void ResetAffectedTargets()

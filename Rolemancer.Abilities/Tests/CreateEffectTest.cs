@@ -1,4 +1,5 @@
-﻿using Rolemancer.Abilities.Attributes;
+﻿using System.Collections;
+using Rolemancer.Abilities.Attributes;
 using Rolemancer.Abilities.DataMapping;
 using Rolemancer.Abilities.Effects;
 using Rolemancer.Abilities.Targets;
@@ -11,20 +12,23 @@ namespace Rolemancer.Abilities.Tests
     {
         private void Start()
         {
-            TestEffects();
+            StartCoroutine(TestEffects());
         }
 
-        private void TestEffects()
+        private IEnumerator TestEffects()
         {
             var dataMap = Mapping.Map;
             var targetId = dataMap.GetNextTargetId();
 
             CreateBaseMaxHpEffect(targetId);
-            CreateMaxHpBuffEffect(targetId);
+            CreateMaxHpBuffEffect_Infinity(targetId);
+            CreateMaxHpBuffEffect_Temporary(targetId);
 
             EffectProcessing.Process(Time.realtimeSinceStartup);
-            //yield return new WaitForEndOfFrame();
-
+            
+            PrintAttributes(targetId);
+            yield return new WaitForSeconds(4);
+            EffectProcessing.Process(Time.realtimeSinceStartup);
             PrintAttributes(targetId);
         }
 
@@ -37,7 +41,7 @@ namespace Rolemancer.Abilities.Tests
             complexKey.AttachAttributes(buffHp);
         }
 
-        private void CreateMaxHpBuffEffect(TargetId target)
+        private void CreateMaxHpBuffEffect_Infinity(TargetId target)
         {
             var effect = Effect.InfinityEffect(new EffectDBKey(1));
             var complexKey = target.AttachEffect(effect);
@@ -46,6 +50,15 @@ namespace Rolemancer.Abilities.Tests
             complexKey.AttachAttributes(buffHp);
         }
 
+        private void CreateMaxHpBuffEffect_Temporary(TargetId target)
+        {
+            var effect = Effect.LongLifeEffect(new EffectDBKey(2), 3);
+            var complexKey = target.AttachEffect(effect);
+
+            var buffHp = new Attribute { DbKey = new AttributeDBKey(0), Value = 9 };
+            complexKey.AttachAttributes(buffHp);
+        }
+        
         private void PrintAttributes(TargetId targetId)
         {
             var attributes = targetId.GetAttributes(Allocator.Temp);
