@@ -2,7 +2,9 @@
 using Rolemancer.Abilities.Attributes;
 using Rolemancer.Abilities.DataMapping;
 using Rolemancer.Abilities.Effects;
+using Rolemancer.Abilities.ModifierProcessors;
 using Rolemancer.Abilities.Targets;
+using Rolemancer.Abilities.Tests.ConcreteModifierProcessors;
 using Unity.Collections;
 using UnityEngine;
 
@@ -10,6 +12,15 @@ namespace Rolemancer.Abilities.Tests
 {
     public class CreateEffectTest : MonoBehaviour
     {
+        private static AttributeDBKey _maxHpKey = new AttributeDBKey(0);
+        private static AttributeDBKey _hpKey = new AttributeDBKey(1);
+        private static AttributeDBKey _damageKey = new AttributeDBKey(2);
+        
+        private static EffectDBKey _baseMaxHpEffectKey = new EffectDBKey(0);
+        private static EffectDBKey _infinityBuffMaxHpEffectKey = new EffectDBKey(1);
+        private static EffectDBKey _temporaryBuffMaxHpEffectKey = new EffectDBKey(2);
+        private static EffectDBKey _damageEffectKey = new EffectDBKey(3);
+        
         private void Start()
         {
             StartCoroutine(TestEffects());
@@ -19,7 +30,11 @@ namespace Rolemancer.Abilities.Tests
         {
             var dataMap = Mapping.Map;
             var targetId = dataMap.GetNextTargetId();
-
+            
+            BattleModifierProcessorLibrary.AddProcessor(new DamageProcessor(_damageKey, _hpKey));
+            BattleModifierProcessorLibrary.AddProcessor(new RelationWithMaxLevel(_maxHpKey, _hpKey));
+            
+            
             CreateBaseMaxHpEffect(targetId);
             CreateMaxHpBuffEffect_Infinity(targetId);
             CreateMaxHpBuffEffect_Temporary(targetId);
@@ -30,32 +45,45 @@ namespace Rolemancer.Abilities.Tests
             yield return new WaitForSeconds(4);
             EffectProcessing.Process(Time.realtimeSinceStartup);
             PrintAttributes(targetId);
+            
+            CreateDamageEffect(targetId);
+            EffectProcessing.Process(Time.realtimeSinceStartup);
+            PrintAttributes(targetId);
         }
 
         private void CreateBaseMaxHpEffect(TargetId target)
         {
-            var effect = Effect.InfinityEffect(new EffectDBKey(0));
+            var effect = Effect.InfinityEffect(_baseMaxHpEffectKey);
             var complexKey = target.AttachEffect(effect);
 
-            var buffHp = new Attribute { DbKey = new AttributeDBKey(0), Value = 7 };
+            var buffHp = new Attribute { DbKey = _maxHpKey, Value = 7 };
             complexKey.AttachAttributes(buffHp);
         }
 
         private void CreateMaxHpBuffEffect_Infinity(TargetId target)
         {
-            var effect = Effect.InfinityEffect(new EffectDBKey(1));
+            var effect = Effect.InfinityEffect(_infinityBuffMaxHpEffectKey);
             var complexKey = target.AttachEffect(effect);
 
-            var buffHp = new Attribute { DbKey = new AttributeDBKey(0), Value = 13 };
+            var buffHp = new Attribute { DbKey = _maxHpKey, Value = 13 };
             complexKey.AttachAttributes(buffHp);
         }
 
         private void CreateMaxHpBuffEffect_Temporary(TargetId target)
         {
-            var effect = Effect.LongLifeEffect(new EffectDBKey(2), 3);
+            var effect = Effect.LongLifeEffect(_temporaryBuffMaxHpEffectKey, 3);
             var complexKey = target.AttachEffect(effect);
 
-            var buffHp = new Attribute { DbKey = new AttributeDBKey(0), Value = 9 };
+            var buffHp = new Attribute { DbKey = _maxHpKey, Value = 9 };
+            complexKey.AttachAttributes(buffHp);
+        }
+        
+        private void CreateDamageEffect(TargetId target)
+        {
+            var effect = Effect.LongLifeEffect(_damageEffectKey, 3);
+            var complexKey = target.AttachEffect(effect);
+
+            var buffHp = new Attribute { DbKey = _damageKey, Value = 3 };
             complexKey.AttachAttributes(buffHp);
         }
         

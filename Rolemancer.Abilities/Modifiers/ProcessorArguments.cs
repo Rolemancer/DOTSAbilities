@@ -7,6 +7,7 @@ namespace Rolemancer.Abilities.Modifiers
     public struct ProcessorArguments : IDisposable
     {
         public TargetId Target;
+        public double ElapsedTime;
 
         public AttributeCollectionByDBKey CurrentAttributes;
         public AttributeCollectionByDBKey PrevAttributes;

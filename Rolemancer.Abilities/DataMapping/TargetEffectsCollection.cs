@@ -120,6 +120,11 @@ namespace Rolemancer.Abilities.DataMapping
             _affectedTargets.Add(targetId);
         }
 
+        public int GetAffectedTargetCount()
+        {
+            return _affectedTargets.Count();
+        }
+        
         public NativeArray<TargetId> GetAffectedTargets(AllocatorManager.AllocatorHandle handle)
         {
             return _affectedTargets.ToNativeArray(handle);

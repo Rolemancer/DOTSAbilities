@@ -4,20 +4,26 @@ using Rolemancer.Abilities.Modifiers;
 using Unity.Collections;
 using UnityEngine;
 
-namespace Rolemancer.Abilities.Tests.ConcreteModifierProcessors
+namespace Rolemancer.Abilities.ModifierProcessors
 {
     public static class BattleModifierProcessorLibrary
     {
-        private static  List<IModifierProcessor> _processors;
+        private static  HashSet<IModifierProcessor> _processors;
         public static  Dictionary<AttributeDBKey, IModifierProcessor> ProcessorFunctions;
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()
         {
-            _processors = new List<IModifierProcessor>();
+            _processors = new HashSet<IModifierProcessor>();
             ProcessorFunctions = new Dictionary<AttributeDBKey, IModifierProcessor>();
             FulfillProcessors();
             ExtractProcessorFunctions();
+        }
+
+        public static void AddProcessor(IModifierProcessor processor)
+        {
+            _processors.Add(processor);
+            ExtractProcessorFunction(processor);
         }
         
         private static void FulfillProcessors()
@@ -30,16 +36,21 @@ namespace Rolemancer.Abilities.Tests.ConcreteModifierProcessors
         {
             foreach (var processor in _processors)
             {
-                var dbKeysCollection = processor.TriggerVariables;
-                var keysArray = dbKeysCollection.GetAll(Allocator.TempJob);
-                for (int i = 0; i < keysArray.Length; i++)
-                {
-                    var dbKey = keysArray[i];
-                    ProcessorFunctions[dbKey] = processor;
-                }
-
-                keysArray.Dispose();
+                ExtractProcessorFunction(processor);
             }
+        }
+
+        private static void ExtractProcessorFunction(IModifierProcessor processor)
+        {
+            var dbKeysCollection = processor.TriggerVariables;
+            var keysArray = dbKeysCollection.GetAll(Allocator.TempJob);
+            for (int i = 0; i < keysArray.Length; i++)
+            {
+                var dbKey = keysArray[i];
+                ProcessorFunctions[dbKey] = processor;
+            }
+
+            keysArray.Dispose();
         }
     }
 }

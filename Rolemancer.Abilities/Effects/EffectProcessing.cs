@@ -1,6 +1,8 @@
 ﻿using Rolemancer.Abilities.Attributes;
 using Rolemancer.Abilities.DataMapping;
+using Rolemancer.Abilities.ModifierProcessors;
 using Rolemancer.Abilities.Modifiers;
+using Rolemancer.Abilities.Targets;
 using Rolemancer.Abilities.Tests.ConcreteModifierProcessors;
 using Unity.Collections;
 using Unity.Jobs;
@@ -20,8 +22,8 @@ namespace Rolemancer.Abilities.Effects
             // Update Life Time
             var checkLifeTime = new CheckLifeTime { Map = map, ElapsedTime = elapsedTime };
             var checkLifeTimeHandle = checkLifeTime.Schedule(pendingHandle);
-            // Process Attributes
-            var updateAttributes = new UpdateTargetAttributes { Map = map, ElapsedTime = elapsedTime };
+            // Prepare Arguments
+            var updateAttributes = new UpdateAttributes { Map = map, ElapsedTime = elapsedTime, };
             var updateAttributesHandle = updateAttributes.Schedule(checkLifeTimeHandle);
             // Remove Disposed
             var removeDiscarded = new RemoveJob() { Map = map };
@@ -93,17 +95,17 @@ namespace Rolemancer.Abilities.Effects
             }
         }
 
-        private struct UpdateTargetAttributes : IJob
+        private struct UpdateAttributes : IJob
         {
             public DataMap Map;
             public double ElapsedTime;
-
+            
             public void Execute()
             {
-                UpdateAttributes();
+                PrepareArguments();
             }
 
-            private void UpdateAttributes()
+            private void PrepareArguments()
             {
                 var effects = Map.Effects.GetAllEffects();
                 var affectedTargets = Map.Effects.GetAffectedTargets(Allocator.Temp);
@@ -116,12 +118,12 @@ namespace Rolemancer.Abilities.Effects
                     var current = Map.Attributes.GetTargetAttributes(targetId, Allocator.Temp);
 
                     var targetEffects = Map.Effects.GetTargetEffects(targetId, Allocator.Temp);
-                    var keys = targetEffects.GetKeyArray(Allocator.Temp);
+                    var targetEffectKeys = targetEffects.GetKeyArray(Allocator.Temp);
                     var diff = new AttributeDBKeysCollection(Allocator.Temp);
                     
-                    for (var j = 0; j < keys.Length; j++)
+                    for (var j = 0; j < targetEffectKeys.Length; j++)
                     {
-                        var effectKey = keys[j];
+                        var effectKey = targetEffectKeys[j];
                         var effect = targetEffects[effectKey];
 
                         var effectAttrs = effectKey.GetAttributes(Map, Allocator.Temp);
@@ -149,32 +151,30 @@ namespace Rolemancer.Abilities.Effects
                         }
                     }
 
-                    keys.Dispose();
-
                     var processorArguments = new ProcessorArguments
                     {
                         Target = targetId,
+                        ElapsedTime = ElapsedTime,
                         CurrentAttributes = current,
                         PrevAttributes = prev,
                         Changed = diff
                     };
-
+                    
                     ModifierProcessorsRunner.ProcessAttributes(BattleModifierProcessorLibrary.ProcessorFunctions,
                         ref processorArguments);
 
-                    Map.Attributes.ReplaceTargetAttributes(targetId, current);
-
+                    Map.Attributes.ReplaceTargetAttributes(processorArguments.Target, processorArguments.CurrentAttributes);
+                    processorArguments.Dispose();
+                    
                     targetEffects.Dispose();
-                    prev.Dispose();
-                    current.Dispose();
-                    diff.Dispose();
+                    targetEffectKeys.Dispose();
                 }
 
                 affectedTargets.Dispose();
                 Map.Effects.ResetAffectedTargets();
             }
         }
-
+        
         private struct RemoveJob : IJob
         {
             public DataMap Map;
