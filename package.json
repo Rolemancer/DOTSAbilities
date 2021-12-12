@@ -1,7 +1,7 @@
 {
-  "name": "com.rolemancer.abilities",
+  "name": "com.rolemancer.abilitytools",
   "version": "0.4.1",
-  "displayName": "Abilities",
+  "displayName": "Ability Tools",
   "description": "Abilities, effects, attributes",
   "unity": "2020.3",
   "unityRelease": "22f1",
@@ -19,5 +19,12 @@
   "author": {
     "name": "Rolemancer",
     "email": "newsomebox@gmail.com"
-  }
+  },
+  "samples": [
+    {
+        "displayName": "Samples",
+        "description": "Scene with several samples",
+        "path": "Samples~/Simple"
+    }
+  ]
 }
