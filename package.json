@@ -3,12 +3,12 @@
   "version": "0.4.2",
   "displayName": "Ability Tools",
   "description": "Abilities, effects, attributes",
-  "unity": "2020.3",
-  "unityRelease": "22f1",
+  "unity": "2021.3",
+  "unityRelease": "9f1",
   "dependencies": {
     "com.unity.collections": "1.4.0",
     "com.unity.burst": "1.7.4",
-    "com.unity.jobs": "0.11.0-preview.6"
+    "com.unity.jobs": "0.70.0-preview.7"
   },
   "hideInEditor": false,
   "keywords": [
