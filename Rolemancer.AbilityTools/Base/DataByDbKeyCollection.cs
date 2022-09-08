@@ -14,11 +14,11 @@ namespace Rolemancer.AbilityTools.Base
         where TDbKey : unmanaged, IEquatable<TDbKey>
         where TTypeWithKey : unmanaged, ITypeWithDbKey<TDbKey>
     {
-        private NativeHashMap<TDbKey, TTypeWithKey> _items;
+        private NativeParallelHashMap<TDbKey, TTypeWithKey> _items;
 
         public DataByDbKeyCollection(AllocatorManager.AllocatorHandle handle)
         {
-            _items = new NativeHashMap<TDbKey, TTypeWithKey>(10, handle);
+            _items = new NativeParallelHashMap<TDbKey, TTypeWithKey>(10, handle);
         }
 
         public TTypeWithKey this[TDbKey key]
@@ -28,7 +28,7 @@ namespace Rolemancer.AbilityTools.Base
             set => _items[key] = value;
         }
 
-        public NativeHashMap<TDbKey, TTypeWithKey>.Enumerator GetEnumerator()
+        public NativeParallelHashMap<TDbKey, TTypeWithKey>.Enumerator GetEnumerator()
         {
             return _items.GetEnumerator();
         }

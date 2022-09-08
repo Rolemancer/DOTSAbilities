@@ -41,14 +41,14 @@ namespace Rolemancer.AbilityTools.DataMapping
             return map.Effects.HasEffect(targetId, effectDataBaseKey);
         }
 
-        public static NativeHashMap<ComplexKey<EffectDBKey>,Effect> GetEffects(this TargetId targetId,
+        public static NativeParallelHashMap<ComplexKey<EffectDBKey>,Effect> GetEffects(this TargetId targetId,
             AllocatorManager.AllocatorHandle handle)
         {
             var map = GetMap();
             return GetEffects(targetId, map, handle);
         }
         
-        public static NativeHashMap<ComplexKey<EffectDBKey>,Effect> GetEffects(this TargetId targetId, DataMap map,
+        public static NativeParallelHashMap<ComplexKey<EffectDBKey>,Effect> GetEffects(this TargetId targetId, DataMap map,
             AllocatorManager.AllocatorHandle handle)
         {
             return map.Effects.GetTargetEffects(targetId, handle);

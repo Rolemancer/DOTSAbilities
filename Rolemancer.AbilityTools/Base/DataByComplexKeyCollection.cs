@@ -15,11 +15,11 @@ namespace Rolemancer.AbilityTools.Base
             where TDbKey : unmanaged, IEquatable<TDbKey>
             where TTypeWithKey : unmanaged, ITypeWithDbKey<TDbKey>
     {
-        private NativeHashMap<ComplexKey<TDbKey>, TTypeWithKey> _items;
+        private NativeParallelHashMap<ComplexKey<TDbKey>, TTypeWithKey> _items;
 
         public DataByComplexKeyCollection(AllocatorManager.AllocatorHandle handle)
         {
-            _items = new NativeHashMap<ComplexKey<TDbKey>, TTypeWithKey>(10, handle);
+            _items = new NativeParallelHashMap<ComplexKey<TDbKey>, TTypeWithKey>(10, handle);
         }
 
         public bool TryGet(ComplexKey<TDbKey> key, out TTypeWithKey typeWithKey)
@@ -69,7 +69,7 @@ namespace Rolemancer.AbilityTools.Base
             set => _items[key] = value;
         }
 
-        public NativeHashMap<ComplexKey<TDbKey>, TTypeWithKey>.Enumerator GetEnumerator()
+        public NativeParallelHashMap<ComplexKey<TDbKey>, TTypeWithKey>.Enumerator GetEnumerator()
         {
             return _items.GetEnumerator();
         }

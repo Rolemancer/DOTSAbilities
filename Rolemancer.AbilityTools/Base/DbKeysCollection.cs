@@ -11,11 +11,11 @@ namespace Rolemancer.AbilityTools.Base
     public struct DbKeysCollection<TDbKey> : IDisposable, IEnumerable<TDbKey>
         where TDbKey : unmanaged, IEquatable<TDbKey>
     {
-        private NativeHashSet<TDbKey> _keys;
+        private NativeParallelHashSet<TDbKey> _keys;
 
         public DbKeysCollection(AllocatorManager.AllocatorHandle handle)
         {
-            _keys = new NativeHashSet<TDbKey>(4, handle);
+            _keys = new NativeParallelHashSet<TDbKey>(4, handle);
         }
 
         public bool Has(TDbKey dbKey)
@@ -43,7 +43,7 @@ namespace Rolemancer.AbilityTools.Base
             _keys.Dispose();
         }
 
-        public NativeHashSet<TDbKey>.Enumerator GetEnumerator()
+        public NativeParallelHashSet<TDbKey>.Enumerator GetEnumerator()
         {
             return _keys.GetEnumerator();
         }

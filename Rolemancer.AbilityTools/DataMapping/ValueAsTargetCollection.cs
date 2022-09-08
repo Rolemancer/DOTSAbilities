@@ -8,11 +8,11 @@ namespace Rolemancer.AbilityTools.DataMapping
 {
     public struct ValueAsTargetCollection : IDisposable
     {
-        private NativeHashMap<ComplexKey<EffectDBKey>, TargetId> _effectAsTarget;
+        private NativeParallelHashMap<ComplexKey<EffectDBKey>, TargetId> _effectAsTarget;
         
         public ValueAsTargetCollection(AllocatorManager.AllocatorHandle handle)
         {
-            _effectAsTarget = new NativeHashMap<ComplexKey<EffectDBKey>, TargetId>(10, handle);
+            _effectAsTarget = new NativeParallelHashMap<ComplexKey<EffectDBKey>, TargetId>(10, handle);
         }
 
         public void AddEffect(ComplexKey<EffectDBKey> effectComplexKey, TargetId targetId)

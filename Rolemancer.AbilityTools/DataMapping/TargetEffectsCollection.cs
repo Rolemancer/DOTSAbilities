@@ -12,16 +12,16 @@ namespace Rolemancer.AbilityTools.DataMapping
     public struct TargetEffectsCollection : IDisposable
     {
         private DataByComplexKeyCollection<EffectDBKey, Effect> _effects;
-        private NativeMultiHashMap<TargetId, ComplexKey<EffectDBKey>> _targetEffects;
-        private NativeHashMap<ComplexKey<EffectDBKey>, TargetId> _effectToTarget;
-        private NativeHashSet<TargetId> _affectedTargets;
+        private NativeParallelMultiHashMap<TargetId, ComplexKey<EffectDBKey>> _targetEffects;
+        private NativeParallelHashMap<ComplexKey<EffectDBKey>, TargetId> _effectToTarget;
+        private NativeParallelHashSet<TargetId> _affectedTargets;
         
         public TargetEffectsCollection(AllocatorManager.AllocatorHandle handle)
         {
             _effects = new DataByComplexKeyCollection<EffectDBKey, Effect>(handle);
-            _targetEffects = new NativeMultiHashMap<TargetId, ComplexKey<EffectDBKey>>(10, handle);
-            _effectToTarget = new NativeHashMap<ComplexKey<EffectDBKey>, TargetId>(10, handle);
-            _affectedTargets = new NativeHashSet<TargetId>(10, handle);
+            _targetEffects = new NativeParallelMultiHashMap<TargetId, ComplexKey<EffectDBKey>>(10, handle);
+            _effectToTarget = new NativeParallelHashMap<ComplexKey<EffectDBKey>, TargetId>(10, handle);
+            _affectedTargets = new NativeParallelHashSet<TargetId>(10, handle);
         }
 
         public void AddEffect(TargetId targetId, Effect effect)
@@ -74,10 +74,10 @@ namespace Rolemancer.AbilityTools.DataMapping
             return _targetEffects.GetKeyArray(handle);
         }
 
-        public NativeHashMap<ComplexKey<EffectDBKey>,Effect> GetTargetEffects(TargetId targetId, AllocatorManager.AllocatorHandle handle)
+        public NativeParallelHashMap<ComplexKey<EffectDBKey>,Effect> GetTargetEffects(TargetId targetId, AllocatorManager.AllocatorHandle handle)
         {
             var count = _targetEffects.CountValuesForKey(targetId);
-            var result = new NativeHashMap<ComplexKey<EffectDBKey>,Effect>(count, handle);
+            var result = new NativeParallelHashMap<ComplexKey<EffectDBKey>,Effect>(count, handle);
 
             
             var valuesForKey = _targetEffects.GetValuesForKey(targetId);

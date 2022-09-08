@@ -1,13 +1,13 @@
 {
   "name": "com.rolemancer.abilitytools",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "displayName": "Ability Tools",
   "description": "Abilities, effects, attributes",
   "unity": "2020.3",
   "unityRelease": "22f1",
   "dependencies": {
-    "com.unity.collections": "1.0.0-pre.5",
-    "com.unity.burst": "1.5.4",
+    "com.unity.collections": "1.4.0",
+    "com.unity.burst": "1.7.4",
     "com.unity.jobs": "0.11.0-preview.6"
   },
   "hideInEditor": false,
@@ -22,9 +22,9 @@
   },
   "samples": [
     {
-        "displayName": "Samples",
-        "description": "Scene with several samples",
-        "path": "Samples~/Simple"
+      "displayName": "Samples",
+      "description": "Scene with several samples",
+      "path": "Samples~/Simple"
     }
   ]
 }

@@ -12,13 +12,13 @@ namespace Rolemancer.AbilityTools.DataMapping
     [BurstCompatible]
     public struct TargetAttributeCollection : IDisposable
     {
-        private NativeHashMap<ComplexKey<AttributeDbKey>, Attributes.Attribute> _attributes;
-        private NativeMultiHashMap<TargetId, ComplexKey<AttributeDbKey>> _targetToAttributes;
+        private NativeParallelHashMap<ComplexKey<AttributeDbKey>, Attributes.Attribute> _attributes;
+        private NativeParallelMultiHashMap<TargetId, ComplexKey<AttributeDbKey>> _targetToAttributes;
 
         public TargetAttributeCollection(AllocatorManager.AllocatorHandle handle)
         {
-            _attributes = new NativeHashMap<ComplexKey<AttributeDbKey>, Attributes.Attribute>(10, handle);
-            _targetToAttributes = new NativeMultiHashMap<TargetId, ComplexKey<AttributeDbKey>>(10, handle);
+            _attributes = new NativeParallelHashMap<ComplexKey<AttributeDbKey>, Attributes.Attribute>(10, handle);
+            _targetToAttributes = new NativeParallelMultiHashMap<TargetId, ComplexKey<AttributeDbKey>>(10, handle);
         }
 
         public DataByDbKeyCollection<AttributeDbKey, Attribute> GetTargetAttributes(
